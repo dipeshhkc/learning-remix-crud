@@ -1,0 +1,15 @@
+.btn-primary {
+    @apply inline-flex items-center px-4 py-1.5 text-sm font-medium border border-transparent outline-none rounded shadow-sm text-white bg-purple-500 hover: bg-purple-600;
+}
+
+.btn-secondary {
+    @apply inline-flex items-center px-4 py-1.5 text-sm font-medium border border-transparent outline-none rounded text-purple-400 bg-purple-500 hover: bg-purple-600;
+}
+
+.btn-danger {
+    @apply inline-flex items-center px-4 py-1.5 text-sm font-medium border border-transparent outline-none rounded shadow-sm text-white bg-red-500 hover: bg-red-600;
+}
+
+.btn-disabled {
+    @apply inline-flex items-center px-4 py-1.5 text-sm font-medium border border-transparent outline-none rounded shadow-sm text-gray-400 bg-gray-100 hover: bg-gray-200;
+}
