@@ -1,11 +1,10 @@
 module.exports = {
-  content: ["./app/**/*.{ts,tsx}"],
-  darkMode: false, 
+  content: ['./app/**/*.{ts,tsx}'],
   theme: {
     extend: {},
   },
   variants: {
     extend: {},
   },
-  plugins: [],
-}
+  plugins: [require('@tailwindcss/forms')],
+};
