@@ -1,98 +1,30 @@
+import { Task } from '.prisma/client';
 import {
   BriefcaseIcon,
   PlusCircleIcon,
-  TrashIcon,
 } from '@heroicons/react/solid';
-import {
-  ActionFunction,
-  json,
-  LoaderFunction,
-} from '@remix-run/server-runtime';
 import { Form, useActionData, useLoaderData } from 'remix';
+import { action as NewTaskAction, NewTaskActionData } from './api/task/new';
+import { loader as TaskLoader } from './api/task/get';
 
-interface ITodo {
-  id: string;
-  title: string;
-}
+export const loader = TaskLoader;
+export const action = NewTaskAction;
 
-type NewTaskActionData = {
-  formError?: string;
-  fieldErrors?: {
-    task?: string;
-  };
-  fields?: {
-    task?: string;
-  };
-  ok?: boolean;
-};
-
-export const loader: LoaderFunction = async () => {
-  const response = await fetch('https://jsonplaceholder.typicode.com/todos');
-  const todos: ITodo[] = await response.json();
-  return todos;
-};
-
-const badRequest = (data: NewTaskActionData) => {
-  return json(data, { status: 400 });
-};
-
-export const action: ActionFunction = async ({ request }) => {
-  const form = await request.formData();
-  type fieldType = 'task';
-  const fieldList: fieldType[] = ['task'];
-  const fields = {} as Record<fieldType, string>;
-
-  for (const fieldName of fieldList) {
-    const fieldValue = form.get(fieldName) || '';
-    fields[fieldName] = fieldValue as string;
-  }
-
-  //validation
-
-  let fieldErrors = {} as Record<fieldType, string>;
-
-  if (!fields.task) {
-    fieldErrors.task = 'Task cannot be empty';
-    return badRequest({ fieldErrors, fields });
-  }
-
-  try {
-    await fetch('https://jsonplaceholder.typicode.com/todos', {
-      method: 'POST',
-      body: JSON.stringify({
-        title: fields.task,
-      }),
-      headers: {
-        'Content-type': 'application/json; charset=UTF-8',
-      },
-    });
-  } catch (err) {
-    console.log('Error', err);
-    return badRequest({
-      formError: err.message,
-    });
-  }
-  return json({ ok: true });
-};
-
-function TodoList() {
-  const todos = useLoaderData<ITodo[]>();
-  const action = useActionData<NewTaskActionData>();
+function TaskList() {
+  const todos = useLoaderData<Task[]>();
+  const addAction = useActionData<NewTaskActionData>();
 
   return (
-    <Form
-      method="post"
-      className="bg-white shadow-md sm:mx-auto sm:max-w-lg mt-10"
-    >
+    <div className="bg-white shadow-md sm:mx-auto sm:max-w-lg mt-10">
       <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-        {action?.formError && (
-          <p className="text-red-500">{action?.formError}</p>
+        {addAction?.formError && (
+          <p className="text-red-500">{addAction?.formError}</p>
         )}
 
         <h1 className="text-2xl font-bold">Todo List</h1>
         <hr className="mt-2" />
 
-        <div className="mt-5 flex rounded-md shadow-sm">
+        <Form method="post" className="mt-5 flex rounded-md shadow-sm">
           <div className="relative flex items-stretch flex-grow focus-within:z-10">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <BriefcaseIcon
@@ -103,8 +35,9 @@ function TodoList() {
             <input
               name="task"
               id="task"
-              className="focus:ring-indigo-500 focus:border-indigo-500 block w-full rounded-none rounded-l-md pl-10 sm:text-sm border-gray-300"
+              className="border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full rounded-none rounded-l-md pl-10 sm:text-sm"
               placeholder="Add New Task"
+              required
             />
           </div>
 
@@ -118,25 +51,42 @@ function TodoList() {
             />
             <span>Add</span>
           </button>
-        </div>
-        {action?.fieldErrors?.title && (
-          <p className="text-red-500 text-sm">{action?.fieldErrors?.title}</p>
+        </Form>
+        {addAction?.fieldErrors?.task && (
+          <p className="text-red-500 text-sm mt-1">
+            {addAction?.fieldErrors?.task}
+          </p>
         )}
 
         <div className="mt-4">
-          {todos.map((item) => (
-            <div
-              key={item.id}
-              className="px-4 py-2 rounded-full shadow mb-4 bg-gray-50 focus:outline-none grid grid-cols-[1fr_30px] items-center"
-            >
-              <span>{item.title}</span>
-              <TrashIcon className="h-5 w-5 text-red-400" />
-            </div>
-          ))}
+          {todos.length ? (
+            todos.map((item) => (
+              <Form
+                method="delete"
+                action="/api/task/delete"
+                key={item.id}
+                className="px-4 py-2 rounded-full shadow mb-4 bg-gray-50 focus:outline-none grid grid-cols-[1fr_100px] items-center"
+              >
+                <input type="hidden" name="taskId" value={item.id} />
+                <span className="text-sm">{item.name}</span>
+
+                <button
+                  type="submit"
+                  className="outline-none text-sm text-green-500"
+                >
+                  Mark Complete
+                </button>
+              </Form>
+            ))
+          ) : (
+            <p className="text-sm text-gray-500">
+              Lucky day. No any Tasks to do. It's Party time 🎊 🎊
+            </p>
+          )}
         </div>
       </div>
-    </Form>
+    </div>
   );
 }
 
-export default TodoList;
+export default TaskList;
