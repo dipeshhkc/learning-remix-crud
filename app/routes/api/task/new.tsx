@@ -1,4 +1,4 @@
-import { ActionFunction, json } from '@remix-run/server-runtime';
+import { ActionFunction, json } from 'remix';
 import { db } from '~/utils/db.server';
 
 export type NewTaskActionData = {

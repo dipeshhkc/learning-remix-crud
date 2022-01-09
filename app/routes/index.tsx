@@ -1,11 +1,9 @@
 import { Task } from '.prisma/client';
-import {
-  BriefcaseIcon,
-  PlusCircleIcon,
-} from '@heroicons/react/solid';
-import { Form, useActionData, useLoaderData } from 'remix';
+import { BriefcaseIcon, PlusCircleIcon } from '@heroicons/react/solid';
+import { Form, useActionData, useLoaderData, useTransition } from 'remix';
 import { action as NewTaskAction, NewTaskActionData } from './api/task/new';
 import { loader as TaskLoader } from './api/task/get';
+import { useEffect, useRef } from 'react';
 
 export const loader = TaskLoader;
 export const action = NewTaskAction;
@@ -13,6 +11,14 @@ export const action = NewTaskAction;
 function TaskList() {
   const todos = useLoaderData<Task[]>();
   const addAction = useActionData<NewTaskActionData>();
+  const ref = useRef<HTMLFormElement>(null);
+  const transition = useTransition();
+
+  useEffect(() => {
+    if (transition.state == 'submitting') {
+      ref.current && ref.current.reset();
+    }
+  }, [transition]);
 
   return (
     <div className="bg-white shadow-md sm:mx-auto sm:max-w-lg mt-10">
@@ -24,7 +30,11 @@ function TaskList() {
         <h1 className="text-2xl font-bold">Todo List</h1>
         <hr className="mt-2" />
 
-        <Form method="post" className="mt-5 flex rounded-md shadow-sm">
+        <Form
+          ref={ref}
+          method="post"
+          className="mt-5 flex rounded-md shadow-sm"
+        >
           <div className="relative flex items-stretch flex-grow focus-within:z-10">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <BriefcaseIcon
@@ -38,6 +48,7 @@ function TaskList() {
               className="border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full rounded-none rounded-l-md pl-10 sm:text-sm"
               placeholder="Add New Task"
               required
+              autoComplete="off"
             />
           </div>
 
