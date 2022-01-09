@@ -1,6 +1,7 @@
 import { ActionFunction, json } from 'remix';
 import { db } from '~/utils/db.server';
 
+// return type of this action 
 export type NewTaskActionData = {
   formError?: string;
   fieldErrors?: {
@@ -17,6 +18,7 @@ const badRequest = (data: NewTaskActionData) => {
 };
 
 export const action: ActionFunction = async ({ request }) => {
+  //setting values to fields from request
   const form = await request.formData();
   type fieldType = 'task';
   const fieldList: fieldType[] = ['task'];
@@ -28,7 +30,6 @@ export const action: ActionFunction = async ({ request }) => {
   }
 
   //validation
-
   let fieldErrors = {} as Record<fieldType, string>;
 
   if (!fields.task) {
@@ -36,6 +37,7 @@ export const action: ActionFunction = async ({ request }) => {
     return badRequest({ fieldErrors, fields });
   }
 
+   //adding task to database
   try {
     await db.task.create({
       data: {

@@ -1,6 +1,7 @@
 import { ActionFunction, json, redirect } from 'remix';
 import { db } from '~/utils/db.server';
 
+// return type of this action 
 export type DeleteTaskActionData = {
   formError?: string;
   fieldErrors?: {
@@ -17,6 +18,7 @@ const badRequest = (data: DeleteTaskActionData) => {
 };
 
 export const action: ActionFunction = async ({ request }) => {
+  //setting values to fields from request
   const form = await request.formData();
   type fieldType = 'taskId';
   const fieldList: fieldType[] = ['taskId'];
@@ -27,10 +29,7 @@ export const action: ActionFunction = async ({ request }) => {
     fields[fieldName] = fieldValue as string;
   }
 
-  console.log("taskid",fields.taskId)
-
   //validation
-
   let fieldErrors = {} as Record<fieldType, string>;
 
   if (!fields.taskId) {
@@ -38,6 +37,7 @@ export const action: ActionFunction = async ({ request }) => {
     return badRequest({ fieldErrors, fields });
   }
 
+  //deleting task to database
   try {
     await db.task.delete({
       where: {
